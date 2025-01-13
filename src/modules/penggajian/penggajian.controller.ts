@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { CreatePenggajianDto, deleteGajiDto, UpdateGajiDto } from './dto/create-penggajian.dto';
 import { Body, Controller, Get, HttpStatus, Req, Res, Post, Put, Delete } from '@nestjs/common';
 import { PenggajianService } from './penggajian.service';
-import { delayWhen } from 'rxjs';
 
 @Controller({
     path: 'api',
@@ -43,7 +42,7 @@ export class PenggajianController {
         }
 
     @Put('/update-gaji')
-    async getGajiKaryawan(
+    async updateGajiKaryawan(
         @Req() req: Request,
         @Res() res: Response,
         @Body() data: UpdateGajiDto,
