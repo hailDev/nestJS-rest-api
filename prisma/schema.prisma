@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ActiveStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        Int          @id @default(autoincrement()) @map("user_id")
+  email     String       @unique @map("user_email")
+  userName  String       @map("user_name")
+  isActived ActiveStatus @default(ACTIVE) @map("is_actived")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Keranjang Keranjang[]
+
+  @@index([isActived, email])
+  @@map("master_user")
+}
+
+model Barang {
+  id          Int         @id @default(autoincrement()) @map("barang_id")
+  namaBarang  String      @map("nama_barang")
+  hargaBarang Int         @map("harga_barang")
+  stokBarang  Int         @map("stok_barang")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Keranjang   Keranjang[]
+
+  @@map("master_barang")
+}
+
+model Keranjang {
+  id        Int      @id @default(autoincrement()) @map("keranjang_id")
+  userId    Int      @map("user_id")
+  barangId  Int      @map("barang_id")
+  jumlah    Int      @default(1) @map("jumlah")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relasi ke User
+  user User @relation(fields: [userId], references: [id])
+
+  // Relasi ke Barang
+  barang Barang @relation(fields: [barangId], references: [id])
+
+  @@map("keranjang")
+}
+
+model Karyawan {
+  id         Int                @id @default(autoincrement()) @map("karyawan_id")
+  nama       String             @map("nama_karyawan")
+  jabatan    String             @map("jabatan")
+  penggajian Penggajian[]
+  penilaian  PenilaianKinerja[]
+
+  @@map("master_karyawan")
+}
+
+model Absensi {
+  id          Int       @id @default(autoincrement()) @map("absensi_id")
+  idKaryawan  Int       @map("karyawan_id")
+  waktuMasuk  DateTime  @map("waktu_masuk") // Menyimpan tanggal dan waktu
+  waktuKeluar DateTime? @map("waktu_keluar") // Menyimpan tanggal dan waktu (opsional)
+  status      String    @map("status")
+
+  @@map("absensi")
+}
+
+model Penggajian {
+  id          Int      @id @default(autoincrement()) @map("penggajian_id")
+  idKaryawan  Int      @map("karyawan_id")
+  periodeGaji DateTime @map("periode_gaji")
+  gajiPokok   Int      @map("gaji_pokok")
+  lembur      Int      @default(0) @map("lembur")
+  potongan    Int      @default(0) @map("potongan")
+  gajiBersih  Int      @map("gaji_bersih")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relasi ke Karyawan
+  karyawan Karyawan @relation(fields: [idKaryawan], references: [id])
+
+  @@map("penggajian")
+}
+
+model PenilaianKinerja {
+  id               Int      @id @default(autoincrement()) @map("penilaian_id")
+  idKaryawan       Int      @map("karyawan_id")
+  tanggalPenilaian DateTime @map("tanggal_penilaian")
+  skorKinerja      Float    @map("skor_kinerja")
+  komentar         String?  @map("komentar")
+  dinilaiOleh      Int      @map("dinilai_oleh")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relasi ke Karyawan
+  karyawan Karyawan @relation(fields: [idKaryawan], references: [id])
+
+  @@map("penilaian_kinerja")
+}
